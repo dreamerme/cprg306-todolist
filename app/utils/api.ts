@@ -7,6 +7,15 @@ interface Todo {
   createdAt: Date;
 }
 
+interface FirestoreTodo {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: {
+    _seconds: number;
+  };
+}
+
 async function getAuthToken() {
   const user = auth.currentUser;
   if (!user) {
@@ -23,7 +32,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
       throw new Error('User not authenticated');
     }
 
-    // Add userId to query params for GET requests
     const finalUrl = !options.method || options.method === 'GET'
       ? `${url}?userId=${user.uid}`
       : url;
@@ -53,8 +61,8 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 }
 
 export async function getTodos(): Promise<Todo[]> {
-  const todos = await fetchWithAuth('/api/todos');
-  return todos.map((todo: any) => ({
+  const todos = await fetchWithAuth('/api/todos') as FirestoreTodo[];
+  return todos.map((todo) => ({
     ...todo,
     createdAt: new Date(todo.createdAt._seconds * 1000),
   }));
@@ -69,7 +77,7 @@ export async function createTodo(text: string): Promise<Todo> {
   const todo = await fetchWithAuth('/api/todos', {
     method: 'POST',
     body: JSON.stringify({ text, userId: user.uid }),
-  });
+  }) as FirestoreTodo;
 
   return {
     ...todo,
@@ -86,7 +94,7 @@ export async function updateTodo(id: string, completed: boolean): Promise<Todo> 
   const todo = await fetchWithAuth('/api/todos', {
     method: 'PATCH',
     body: JSON.stringify({ id, completed, userId: user.uid }),
-  });
+  }) as FirestoreTodo;
 
   return {
     ...todo,
