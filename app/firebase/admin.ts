@@ -7,13 +7,25 @@ const privateKey = process.env.FIREBASE_PRIVATE_KEY
   ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
   : undefined;
 
+if (!privateKey) {
+  throw new Error('FIREBASE_PRIVATE_KEY is not set in environment variables');
+}
+
+if (!process.env.FIREBASE_PROJECT_ID) {
+  throw new Error('FIREBASE_PROJECT_ID is not set in environment variables');
+}
+
+if (!process.env.FIREBASE_CLIENT_EMAIL) {
+  throw new Error('FIREBASE_CLIENT_EMAIL is not set in environment variables');
+}
+
 const firebaseAdminConfig = {
   credential: cert({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     privateKey: privateKey,
   }),
-  databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
+  databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`,
 };
 
 // Initialize Firebase Admin
